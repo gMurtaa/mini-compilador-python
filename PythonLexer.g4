@@ -31,8 +31,7 @@ DICT_TYPE   : 'dict' ;
 TUPLE_TYPE  : 'tuple' ;
 SET_TYPE    : 'set' ;
 
-// PALAVRAS-CHAVE — Funções Built-in
-// int, float, str, list, dict partilham token com os tipos; distinção feita no Parser
+// PALAVRAS-CHAVE - Funções Built-in
 PRINT       : 'print' ;
 INPUT       : 'input' ;
 LEN         : 'len' ;
@@ -71,7 +70,6 @@ ASYNC       : 'async' ;
 AWAIT       : 'await' ;
 
 // LITERAIS
-// FLOAT_LIT antes de INT_LIT — evita que "3.14" seja lido como INT + DOT + INT
 FLOAT_LIT   : [0-9]+ '.' [0-9]*
             | '.' [0-9]+
             ;
@@ -82,7 +80,7 @@ STRING_LIT  : '"'  (~["\\\r\n])* '"'
             | '\'' (~['\\\r\n])* '\''
             ;
 
-// SÍMBOLOS DE ATRIBUIÇÃO
+// SÍMBOLOS DE ATRIBUIÇÃO (multi-char primeiro)
 POW_EQ      : '**=' ;
 FLOORDIV_EQ : '//=' ;
 PLUS_EQ     : '+=' ;
@@ -92,7 +90,7 @@ DIV_EQ      : '/=' ;
 MOD_EQ      : '%=' ;
 ASSIGN      : '=' ;
 
-// OPERADORES ARITMÉTICOS
+// OPERADORES ARITMÉTICOS (multi-char primeiro)
 POW         : '**' ;
 FLOORDIV    : '//' ;
 PLUS        : '+' ;
@@ -101,7 +99,7 @@ MULT        : '*' ;
 DIV         : '/' ;
 MOD         : '%' ;
 
-// OPERADORES RELACIONAIS
+// OPERADORES RELACIONAIS (multi-char primeiro)
 EQ          : '==' ;
 NEQ         : '!=' ;
 LEQ         : '<=' ;
@@ -109,7 +107,7 @@ GEQ         : '>=' ;
 LT          : '<' ;
 GT          : '>' ;
 
-// OPERADORES BIT A BIT
+// OPERADORES BIT A BIT (multi-char primeiro)
 LSHIFT      : '<<' ;
 RSHIFT      : '>>' ;
 BITAND      : '&' ;
@@ -133,7 +131,7 @@ SEMICOLON   : ';' ;
 NEWLINE     : '\r'? '\n' ;
 COMMENT     : '#' ~[\r\n]* -> skip ;
 
-// IDENTIFICADORES E ESPAÇOS EM BRANCO
+// IDENTIFICADORES E ESPAÇOS
 ID          : LETTER (LETTER | DIGIT)* ;
 fragment LETTER : [a-zA-Z_] ;
 fragment DIGIT  : [0-9] ;

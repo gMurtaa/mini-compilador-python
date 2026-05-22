@@ -3,43 +3,36 @@ parser grammar PythonParser;
 options { tokenVocab=PythonLexer; }
 
 // ─── REGRA PRINCIPAL ───
-code: stat* EOF;
+code: linha* EOF;
+
+// ─── LINHA ───
+linha: stat;
 
 // ─── INSTRUÇÃO ───
-stat: expr '\n';
+stat: expr NEWLINE;
 
 // ─── EXPRESSÕES ───
 expr
-    : ID                          # ids
-    | numeros                     # numerosExpr
-    | operacoesComExpressoes      # operacoesExpr
-    | expressoesEntreParenteses   # parentesesExpr
-    ;
-
-// ─── NÚMEROS ───
-numeros
-    : INT_LIT
-    | FLOAT_LIT
-    ;
-
-// ─── OPERAÇÕES COM EXPRESSÕES ───
-operacoesComExpressoes
-    : expr PLUS     expr
-    | expr MINUS    expr
-    | expr MULT     expr
-    | expr DIV      expr
-    | expr MOD      expr
-    | expr POW      expr
-    | expr FLOORDIV expr
-    | expr EQ       expr
-    | expr NEQ      expr
-    | expr LT       expr
-    | expr GT       expr
-    | expr LEQ      expr
-    | expr GEQ      expr
-    ;
-
-// ─── EXPRESSÕES ENTRE PARÊNTESES ───
-expressoesEntreParenteses
-    : LPAREN expr RPAREN
+    : expr POW      expr    # expPotencia
+    | expr FLOORDIV expr    # expDivisaoInteira
+    | expr MULT     expr    # expMultiplicacao
+    | expr DIV      expr    # expDivisao
+    | expr MOD      expr    # expModulo
+    | expr PLUS     expr    # expAdicao
+    | expr MINUS    expr    # expSubtracao
+    | expr EQ       expr    # expIgual
+    | expr NEQ      expr    # expDiferente
+    | expr LT       expr    # expMenor
+    | expr GT       expr    # expMaior
+    | expr LEQ      expr    # expMenorIgual
+    | expr GEQ      expr    # expMaiorIgual
+    | NOT expr              # expNegacao
+    | expr AND      expr    # expE
+    | expr OR       expr    # expOu
+    | LPAREN expr RPAREN    # expParenteses
+    | INT_LIT               # expInteiro
+    | FLOAT_LIT             # expDecimal
+    | TRUE                  # expVerdadeiro
+    | FALSE                 # expFalso
+    | ID                    # expId
     ;
