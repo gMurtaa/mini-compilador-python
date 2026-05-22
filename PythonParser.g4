@@ -3,7 +3,7 @@ parser grammar PythonParser;
 options { tokenVocab=PythonLexer; }
 
 // ─── REGRA PRINCIPAL ───
-code: (stat | condicional)* EOF;
+code: (stat | condicional | func | func_call)* EOF;
 
 // ─── INSTRUÇÃO ───
 stat: expr NEWLINE;
@@ -18,28 +18,47 @@ condicional
 // ─── BLOCO ───
 bloco: stat+ ;
 
+// ─── DEFINIÇÃO DE FUNÇÃO ───
+func
+    : DEF ID LPAREN params? RPAREN COLON NEWLINE bloco
+    ;
+
+params
+    : ID (COMMA ID)*
+    ;
+
+// ─── CHAMADA DE FUNÇÃO (como instrução top-level) ───
+func_call
+    : ID LPAREN args? RPAREN NEWLINE
+    ;
+
+args
+    : expr (COMMA expr)*
+    ;
+
 // ─── EXPRESSÕES ───
 expr
-    : expr POW      expr    # expPotencia
-    | expr FLOORDIV expr    # expDivisaoInteira
-    | expr MULT     expr    # expMultiplicacao
-    | expr DIV      expr    # expDivisao
-    | expr MOD      expr    # expModulo
-    | expr PLUS     expr    # expAdicao
-    | expr MINUS    expr    # expSubtracao
-    | expr EQ       expr    # expIgual
-    | expr NEQ      expr    # expDiferente
-    | expr LT       expr    # expMenor
-    | expr GT       expr    # expMaior
-    | expr LEQ      expr    # expMenorIgual
-    | expr GEQ      expr    # expMaiorIgual
-    | NOT expr              # expNegacao
-    | expr AND      expr    # expE
-    | expr OR       expr    # expOu
-    | LPAREN expr RPAREN    # expParenteses
-    | INT_LIT               # expInteiro
-    | FLOAT_LIT             # expDecimal
-    | TRUE                  # expVerdadeiro
-    | FALSE                 # expFalso
-    | ID                    # expId
+    : expr POW      expr            # expPotencia
+    | expr FLOORDIV expr            # expDivisaoInteira
+    | expr MULT     expr            # expMultiplicacao
+    | expr DIV      expr            # expDivisao
+    | expr MOD      expr            # expModulo
+    | expr PLUS     expr            # expAdicao
+    | expr MINUS    expr            # expSubtracao
+    | expr EQ       expr            # expIgual
+    | expr NEQ      expr            # expDiferente
+    | expr LT       expr            # expMenor
+    | expr GT       expr            # expMaior
+    | expr LEQ      expr            # expMenorIgual
+    | expr GEQ      expr            # expMaiorIgual
+    | NOT expr                      # expNegacao
+    | expr AND      expr            # expE
+    | expr OR       expr            # expOu
+    | ID LPAREN args? RPAREN        # expFuncCall
+    | LPAREN expr RPAREN            # expParenteses
+    | INT_LIT                       # expInteiro
+    | FLOAT_LIT                     # expDecimal
+    | TRUE                          # expVerdadeiro
+    | FALSE                         # expFalso
+    | ID                            # expId
     ;
