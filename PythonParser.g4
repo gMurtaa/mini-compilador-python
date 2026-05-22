@@ -3,13 +3,20 @@ parser grammar PythonParser;
 options { tokenVocab=PythonLexer; }
 
 // ─── REGRA PRINCIPAL ───
-code: linha* EOF;
-
-// ─── LINHA ───
-linha: stat;
+code: (stat | condicional)* EOF;
 
 // ─── INSTRUÇÃO ───
 stat: expr NEWLINE;
+
+// ─── CONDICIONAL ───
+condicional
+    : IF expr COLON NEWLINE bloco
+      (ELIF expr COLON NEWLINE bloco)*
+      (ELSE COLON NEWLINE bloco)?
+    ;
+
+// ─── BLOCO ───
+bloco: stat+ ;
 
 // ─── EXPRESSÕES ───
 expr
