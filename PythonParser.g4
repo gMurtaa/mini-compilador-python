@@ -3,7 +3,7 @@ parser grammar PythonParser;
 options { tokenVocab=PythonLexer; }
 
 // ─── REGRA PRINCIPAL ───
-code: (stat | condicional | func | func_call)* EOF;
+code: (stat | condicional | func | func_call | loop_while | loop_for)* EOF;
 
 // ─── INSTRUÇÃO ───
 stat: expr NEWLINE;
@@ -34,6 +34,16 @@ func_call
 
 args
     : expr (COMMA expr)*
+    ;
+
+// ─── LOOP WHILE ───
+loop_while
+    : WHILE expr COLON NEWLINE bloco
+    ;
+
+// ─── LOOP FOR ───
+loop_for
+    : FOR ID IN expr COLON NEWLINE bloco
     ;
 
 // ─── EXPRESSÕES ───
