@@ -76,7 +76,8 @@ FLOAT_LIT   : [0-9]+ '.' [0-9]*
 
 INT_LIT     : [0-9]+ ;
 
-STRING_LIT  : '"'  (~["\\\r\n])* '"'
+// STRING (renomeado de STRING_LIT — suporta aspas duplas e simples)
+STRING      : '"'  (~["\\\r\n])* '"'
             | '\'' (~['\\\r\n])* '\''
             ;
 

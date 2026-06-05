@@ -46,6 +46,28 @@ loop_for
     : FOR ID IN expr COLON NEWLINE bloco
     ;
 
+// ─── ESTRUTURAS DE DADOS ───
+lista
+    : LBRACKET (expr (COMMA expr)*)? RBRACKET
+    ;
+
+tupla
+    : LPAREN expr COMMA (expr COMMA)* expr? RPAREN
+    | LPAREN expr COMMA RPAREN
+    ;
+
+set_lit
+    : LBRACE expr (COMMA expr)* RBRACE
+    ;
+
+par_chave_valor
+    : expr COLON expr
+    ;
+
+dicionario
+    : LBRACE (par_chave_valor (COMMA par_chave_valor)*)? RBRACE
+    ;
+
 // ─── EXPRESSÕES ───
 expr
     : expr POW      expr            # expPotencia
@@ -66,8 +88,13 @@ expr
     | expr OR       expr            # expOu
     | ID LPAREN args? RPAREN        # expFuncCall
     | LPAREN expr RPAREN            # expParenteses
+    | lista                         # expLista
+    | tupla                         # expTupla
+    | set_lit                       # expSet
+    | dicionario                    # expDicionario
     | INT_LIT                       # expInteiro
     | FLOAT_LIT                     # expDecimal
+    | STRING                        # expString
     | TRUE                          # expVerdadeiro
     | FALSE                         # expFalso
     | ID                            # expId
