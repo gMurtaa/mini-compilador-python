@@ -14,8 +14,18 @@ class PythonParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by PythonParser#stat.
-    def visitStat(self, ctx:PythonParser.StatContext):
+    # Visit a parse tree produced by PythonParser#statAssignment.
+    def visitStatAssignment(self, ctx:PythonParser.StatAssignmentContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by PythonParser#statReturn.
+    def visitStatReturn(self, ctx:PythonParser.StatReturnContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by PythonParser#statExpr.
+    def visitStatExpr(self, ctx:PythonParser.StatExprContext):
         return self.visitChildren(ctx)
 
 

@@ -3,10 +3,14 @@ parser grammar PythonParser;
 options { tokenVocab=PythonLexer; }
 
 // ─── REGRA PRINCIPAL ───
-code: (stat | condicional | func | func_call | loop_while | loop_for)* EOF;
+code: (NEWLINE | stat | condicional | func | func_call | loop_while | loop_for)* EOF;
 
 // ─── INSTRUÇÃO ───
-stat: expr NEWLINE;
+stat
+    : ID ASSIGN expr NEWLINE   # statAssignment
+    | RETURN expr NEWLINE      # statReturn
+    | expr NEWLINE             # statExpr
+    ;
 
 // ─── CONDICIONAL ───
 condicional

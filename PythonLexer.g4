@@ -31,19 +31,6 @@ DICT_TYPE   : 'dict' ;
 TUPLE_TYPE  : 'tuple' ;
 SET_TYPE    : 'set' ;
 
-// PALAVRAS-CHAVE - Funções Built-in
-PRINT       : 'print' ;
-INPUT       : 'input' ;
-LEN         : 'len' ;
-RANGE       : 'range' ;
-TYPE_FUNC   : 'type' ;
-ABS         : 'abs' ;
-MAX         : 'max' ;
-MIN         : 'min' ;
-SUM         : 'sum' ;
-SORTED      : 'sorted' ;
-OPEN        : 'open' ;
-
 // PALAVRAS-CHAVE — Operadores Booleanos (palavras)
 AND         : 'and' ;
 OR          : 'or' ;
