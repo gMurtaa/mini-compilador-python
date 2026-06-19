@@ -15,20 +15,44 @@ class Compiler(PythonParserVisitor):
 
     def __init__(self):
         super(Compiler, self).__init__()
-        self.vars = {}
-        self.funcs = {}
+        self.vars = {}   # variáveis em runtime
+        self.funcs = {}  # funções definidas pelo utilizador
         return None
 
-    # ─── CODE ───
+    # ════════════════════════════════════════════════════
+    # CODE — ponto de entrada
+    # ════════════════════════════════════════════════════
     def visitCode(self, ctx: PythonParser.CodeContext):
         return self.visitChildren(ctx)
 
-    # ─── STAT: assignment, return, expression ───
+    # ════════════════════════════════════════════════════
+    # STAT — instruções
+    # ════════════════════════════════════════════════════
     def visitStatAssignment(self, ctx: PythonParser.StatAssignmentContext):
         name = ctx.ID().getText()
         value = self.visit(ctx.expr())
         self.vars[name] = value
         return value
+
+    def visitStatAugAssignment(self, ctx: PythonParser.StatAugAssignmentContext):
+        name = ctx.ID().getText()
+        if name not in self.vars:
+            raise NameError(f"Variável '{name}' não definida antes de '{ctx.augop().getText()}'")
+        current = self.vars[name]
+        value = self.visit(ctx.expr())
+        op = ctx.augop().getText()
+        ops = {
+            '+=': lambda a, b: a + b,
+            '-=': lambda a, b: a - b,
+            '*=': lambda a, b: a * b,
+            '/=': lambda a, b: a / b,
+            '//=': lambda a, b: a // b,
+            '%=': lambda a, b: a % b,
+            '**=': lambda a, b: a ** b,
+        }
+        result = ops[op](current, value)
+        self.vars[name] = result
+        return result
 
     def visitStatReturn(self, ctx: PythonParser.StatReturnContext):
         value = self.visit(ctx.expr())
@@ -37,7 +61,12 @@ class Compiler(PythonParserVisitor):
     def visitStatExpr(self, ctx: PythonParser.StatExprContext):
         return self.visit(ctx.expr())
 
-    # ─── CONDICIONAL ───
+    def visitAugop(self, ctx: PythonParser.AugopContext):
+        return ctx.getText()
+
+    # ════════════════════════════════════════════════════
+    # CONDICIONAL — if / elif / else
+    # ════════════════════════════════════════════════════
     def visitCondicional(self, ctx: PythonParser.CondicionalContext):
         n_elif = len(ctx.ELIF())
 
@@ -53,40 +82,42 @@ class Compiler(PythonParserVisitor):
 
         return None
 
-    # ─── BLOCO ───
+    # ════════════════════════════════════════════════════
+    # BLOCO — sequência de instruções
+    # ════════════════════════════════════════════════════
     def visitBloco(self, ctx: PythonParser.BlocoContext):
         result = None
         for stat in ctx.stat():
             result = self.visit(stat)
         return result
 
-    # ─── FUNC: guarda o contexto para execução posterior ───
+    # ════════════════════════════════════════════════════
+    # FUNÇÕES — definição e chamada
+    # ════════════════════════════════════════════════════
     def visitFunc(self, ctx: PythonParser.FuncContext):
         func_name = ctx.ID().getText()
         self.funcs[func_name] = ctx
         return None
 
-    # ─── PARAMS: devolve lista de nomes ───
     def visitParams(self, ctx: PythonParser.ParamsContext):
         return [ctx.ID(i).getText() for i in range(len(ctx.ID()))]
 
-    # ─── FUNC_CALL (top-level) ───
     def visitFunc_call(self, ctx: PythonParser.Func_callContext):
         func_name = ctx.ID().getText()
         args = self._eval_args(ctx.args()) if ctx.args() else []
         return self._call_function(func_name, args)
 
-    # ─── ARGS ───
     def visitArgs(self, ctx: PythonParser.ArgsContext):
         return [self.visit(expr) for expr in ctx.expr()]
 
-    # ─── LOOP WHILE ───
+    # ════════════════════════════════════════════════════
+    # LOOPS
+    # ════════════════════════════════════════════════════
     def visitLoop_while(self, ctx: PythonParser.Loop_whileContext):
         while self.visit(ctx.expr()):
             self.visit(ctx.bloco())
         return None
 
-    # ─── LOOP FOR ───
     def visitLoop_for(self, ctx: PythonParser.Loop_forContext):
         var_name = ctx.ID().getText()
         iterable = self.visit(ctx.expr())
@@ -95,7 +126,9 @@ class Compiler(PythonParserVisitor):
             self.visit(ctx.bloco())
         return None
 
-    # ─── ESTRUTURAS DE DADOS ───
+    # ════════════════════════════════════════════════════
+    # ESTRUTURAS DE DADOS
+    # ════════════════════════════════════════════════════
     def visitLista(self, ctx: PythonParser.ListaContext):
         return [self.visit(expr) for expr in ctx.expr()]
 
@@ -115,7 +148,9 @@ class Compiler(PythonParserVisitor):
             result[k] = v
         return result
 
-    # ─── EXPRESSÕES: LITERAIS ───
+    # ════════════════════════════════════════════════════
+    # EXPRESSÕES — literais
+    # ════════════════════════════════════════════════════
     def visitExpInteiro(self, ctx: PythonParser.ExpInteiroContext):
         return int(ctx.INT_LIT().getText())
 
@@ -123,8 +158,16 @@ class Compiler(PythonParserVisitor):
         return float(ctx.FLOAT_LIT().getText())
 
     def visitExpString(self, ctx: PythonParser.ExpStringContext):
-        text = ctx.STRING().getText()
-        return text[1:-1]
+        raw = ctx.STRING().getText()
+        # Remove aspas delimitadoras e interpreta sequências de escape
+        inner = raw[1:-1]
+        inner = inner.replace('\\n', '\n')
+        inner = inner.replace('\\t', '\t')
+        inner = inner.replace('\\r', '\r')
+        inner = inner.replace('\\"', '"')
+        inner = inner.replace("\\'", "'")
+        inner = inner.replace('\\\\', '\\')
+        return inner
 
     def visitExpVerdadeiro(self, ctx: PythonParser.ExpVerdadeiroContext):
         return True
@@ -132,17 +175,33 @@ class Compiler(PythonParserVisitor):
     def visitExpFalso(self, ctx: PythonParser.ExpFalsoContext):
         return False
 
+    def visitExpNone(self, ctx: PythonParser.ExpNoneContext):
+        return None
+
     def visitExpId(self, ctx: PythonParser.ExpIdContext):
         name = ctx.ID().getText()
         if name in self.vars:
             return self.vars[name]
-        raise NameError(f"Variable '{name}' not defined")
+        raise NameError(f"Variável '{name}' não definida")
 
-    # ─── EXPRESSÕES: PARÊNTESES ───
+    # ════════════════════════════════════════════════════
+    # EXPRESSÕES — agrupamento
+    # ════════════════════════════════════════════════════
     def visitExpParenteses(self, ctx: PythonParser.ExpParentesesContext):
         return self.visit(ctx.expr())
 
-    # ─── EXPRESSÕES: ARITMÉTICA ───
+    # ════════════════════════════════════════════════════
+    # EXPRESSÕES — unários
+    # ════════════════════════════════════════════════════
+    def visitExpNegativo(self, ctx: PythonParser.ExpNegativoContext):
+        return -self.visit(ctx.expr())
+
+    def visitExpNegacao(self, ctx: PythonParser.ExpNegacaoContext):
+        return not self.visit(ctx.expr())
+
+    # ════════════════════════════════════════════════════
+    # EXPRESSÕES — aritmética
+    # ════════════════════════════════════════════════════
     def visitExpAdicao(self, ctx: PythonParser.ExpAdicaoContext):
         return self.visit(ctx.expr(0)) + self.visit(ctx.expr(1))
 
@@ -164,7 +223,9 @@ class Compiler(PythonParserVisitor):
     def visitExpPotencia(self, ctx: PythonParser.ExpPotenciaContext):
         return self.visit(ctx.expr(0)) ** self.visit(ctx.expr(1))
 
-    # ─── EXPRESSÕES: COMPARAÇÃO ───
+    # ════════════════════════════════════════════════════
+    # EXPRESSÕES — comparação
+    # ════════════════════════════════════════════════════
     def visitExpIgual(self, ctx: PythonParser.ExpIgualContext):
         return self.visit(ctx.expr(0)) == self.visit(ctx.expr(1))
 
@@ -183,23 +244,26 @@ class Compiler(PythonParserVisitor):
     def visitExpMaiorIgual(self, ctx: PythonParser.ExpMaiorIgualContext):
         return self.visit(ctx.expr(0)) >= self.visit(ctx.expr(1))
 
-    # ─── EXPRESSÕES: LÓGICAS ───
+    # ════════════════════════════════════════════════════
+    # EXPRESSÕES — lógicas
+    # ════════════════════════════════════════════════════
     def visitExpE(self, ctx: PythonParser.ExpEContext):
         return self.visit(ctx.expr(0)) and self.visit(ctx.expr(1))
 
     def visitExpOu(self, ctx: PythonParser.ExpOuContext):
         return self.visit(ctx.expr(0)) or self.visit(ctx.expr(1))
 
-    def visitExpNegacao(self, ctx: PythonParser.ExpNegacaoContext):
-        return not self.visit(ctx.expr(0))
-
-    # ─── EXPRESSÕES: CHAMADA DE FUNÇÃO ───
+    # ════════════════════════════════════════════════════
+    # EXPRESSÕES — chamada de função
+    # ════════════════════════════════════════════════════
     def visitExpFuncCall(self, ctx: PythonParser.ExpFuncCallContext):
         func_name = ctx.ID().getText()
         args = self._eval_args(ctx.args()) if ctx.args() else []
         return self._call_function(func_name, args)
 
-    # ─── EXPRESSÕES: ESTRUTURAS DE DADOS ───
+    # ════════════════════════════════════════════════════
+    # EXPRESSÕES — estruturas de dados (wrappers)
+    # ════════════════════════════════════════════════════
     def visitExpLista(self, ctx: PythonParser.ExpListaContext):
         return self.visit(ctx.lista())
 
@@ -212,7 +276,9 @@ class Compiler(PythonParserVisitor):
     def visitExpDicionario(self, ctx: PythonParser.ExpDicionarioContext):
         return self.visit(ctx.dicionario())
 
-    # ─── HELPERS ───
+    # ════════════════════════════════════════════════════
+    # HELPERS
+    # ════════════════════════════════════════════════════
     def _eval_args(self, args_ctx):
         if args_ctx is None:
             return []
@@ -239,13 +305,13 @@ class Compiler(PythonParserVisitor):
 
             return result
 
-        builtin = (
-            __builtins__.get(func_name) if isinstance(__builtins__, dict)
-            else getattr(__builtins__, func_name, None)
-        )
+        # Built-ins do Python
+        builtins = __builtins__ if isinstance(__builtins__, dict) else vars(__builtins__)
+        builtin = builtins.get(func_name)
         if builtin is not None:
             return builtin(*args)
-        raise NameError(f"Function '{func_name}' not defined")
+
+        raise NameError(f"Função '{func_name}' não definida")
 
 
 del (PythonParser, PythonParserVisitor)

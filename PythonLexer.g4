@@ -18,18 +18,13 @@ WITH        : 'with' ;
 MATCH       : 'match' ;
 CASE        : 'case' ;
 
-// PALAVRAS-CHAVE — Tipos de Dados
+// PALAVRAS-CHAVE — Literais especiais
 NONE        : 'None' ;
 TRUE        : 'True' ;
 FALSE       : 'False' ;
-INT_TYPE    : 'int' ;
-FLOAT_TYPE  : 'float' ;
-STR_TYPE    : 'str' ;
-BOOL_TYPE   : 'bool' ;
-LIST_TYPE   : 'list' ;
-DICT_TYPE   : 'dict' ;
-TUPLE_TYPE  : 'tuple' ;
-SET_TYPE    : 'set' ;
+
+// Nota: int, float, str, bool, list, dict, tuple, set NÃO são palavras reservadas
+// em Python — são nomes de funções/tipos built-in e são tratados como ID.
 
 // PALAVRAS-CHAVE — Operadores Booleanos (palavras)
 AND         : 'and' ;
@@ -63,10 +58,11 @@ FLOAT_LIT   : [0-9]+ '.' [0-9]*
 
 INT_LIT     : [0-9]+ ;
 
-// STRING (renomeado de STRING_LIT — suporta aspas duplas e simples)
-STRING      : '"'  (~["\\\r\n])* '"'
-            | '\'' (~['\\\r\n])* '\''
+// STRING — suporta aspas duplas e simples com sequências de escape básicas
+STRING      : '"'  (ESC_SEQ | ~["\\\r\n])* '"'
+            | '\'' (ESC_SEQ | ~['\\\r\n])* '\''
             ;
+fragment ESC_SEQ : '\\' [\\'"nrtbf0] ;
 
 // SÍMBOLOS DE ATRIBUIÇÃO (multi-char primeiro)
 POW_EQ      : '**=' ;

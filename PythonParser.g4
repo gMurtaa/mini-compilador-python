@@ -7,9 +7,21 @@ code: (NEWLINE | stat | condicional | func | func_call | loop_while | loop_for)*
 
 // ─── INSTRUÇÃO ───
 stat
-    : ID ASSIGN expr NEWLINE   # statAssignment
-    | RETURN expr NEWLINE      # statReturn
-    | expr NEWLINE             # statExpr
+    : ID ASSIGN expr NEWLINE      # statAssignment
+    | ID augop  expr NEWLINE      # statAugAssignment
+    | RETURN expr NEWLINE         # statReturn
+    | expr NEWLINE                # statExpr
+    ;
+
+// ─── OPERADORES DE ATRIBUIÇÃO COMPOSTA ───
+augop
+    : PLUS_EQ
+    | MINUS_EQ
+    | MULT_EQ
+    | DIV_EQ
+    | FLOORDIV_EQ
+    | MOD_EQ
+    | POW_EQ
     ;
 
 // ─── CONDICIONAL ───
@@ -72,9 +84,10 @@ dicionario
     : LBRACE (par_chave_valor (COMMA par_chave_valor)*)? RBRACE
     ;
 
-// ─── EXPRESSÕES ───
+// ─── EXPRESSÕES (ordem = precedência, primeiro = maior) ───
 expr
     : expr POW      expr            # expPotencia
+    | MINUS expr                    # expNegativo
     | expr FLOORDIV expr            # expDivisaoInteira
     | expr MULT     expr            # expMultiplicacao
     | expr DIV      expr            # expDivisao
@@ -101,5 +114,6 @@ expr
     | STRING                        # expString
     | TRUE                          # expVerdadeiro
     | FALSE                         # expFalso
+    | NONE                          # expNone
     | ID                            # expId
     ;

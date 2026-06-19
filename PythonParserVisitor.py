@@ -19,6 +19,11 @@ class PythonParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by PythonParser#statAugAssignment.
+    def visitStatAugAssignment(self, ctx:PythonParser.StatAugAssignmentContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by PythonParser#statReturn.
     def visitStatReturn(self, ctx:PythonParser.StatReturnContext):
         return self.visitChildren(ctx)
@@ -26,6 +31,11 @@ class PythonParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by PythonParser#statExpr.
     def visitStatExpr(self, ctx:PythonParser.StatExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by PythonParser#augop.
+    def visitAugop(self, ctx:PythonParser.AugopContext):
         return self.visitChildren(ctx)
 
 
@@ -174,6 +184,11 @@ class PythonParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by PythonParser#expNone.
+    def visitExpNone(self, ctx:PythonParser.ExpNoneContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by PythonParser#expId.
     def visitExpId(self, ctx:PythonParser.ExpIdContext):
         return self.visitChildren(ctx)
@@ -186,6 +201,11 @@ class PythonParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by PythonParser#expOu.
     def visitExpOu(self, ctx:PythonParser.ExpOuContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by PythonParser#expNegativo.
+    def visitExpNegativo(self, ctx:PythonParser.ExpNegativoContext):
         return self.visitChildren(ctx)
 
 

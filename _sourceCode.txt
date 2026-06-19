@@ -2,19 +2,44 @@ x = 10
 y = 3.5
 z = x + y
 
+x += 5
+y -= 1.0
+z *= 2
+
+neg = -x
+pot = -2 ** 2
+
+nada = None
+
+s = "hello\nworld"
+
+n_int = int(3.9)
+n_str = str(42)
+n_float = float("3.14")
+
 def square(n):
     return n ** 2
 
-result = square(x)
+def soma(a, b):
+    return a + b
 
-if result > 50:
-    print(result)
+result = square(x)
+total = soma(result, 10)
+
+if result > 100:
+    print("grande")
+elif result == 225:
+    print("exacto")
 else:
-    print(z)
+    print("outro")
 
 i = 0
 while i < 3:
-    i = i + 1
+    i += 1
 
+acc = 0
 for k in range(5):
-    print(k)
+    acc += k
+
+flag = True
+check = not flag
